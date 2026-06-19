@@ -36,6 +36,10 @@ graph TD
     style Ctrl fill:#D2FFD2,stroke:#33CC33,stroke-width:2px,color:#000000;
 ```
 
+<p align="center">
+  <img src="assets/client_usability.png" alt="Client Usability" width="100%" />
+</p>
+
 ---
 
 ## ⚡ Caching Strategy (Cache-Aside)
@@ -51,7 +55,8 @@ The **Cache-Aside** (or Lazy Loading) flow implemented in [mundial_controller.py
         2.  The controller saves the retrieved database records into Redis with a **20-second TTL** (Time To Live).
         3.  The controller formats and returns the data to the client.
 2.  **Write / Cache Invalidation**:
-    *   To prevent stale data, a manual invalidation endpoint (`POST /api/v1/mundiales/invalidar`) is provided to clear the cached key, forcing the next read to fetch fresh database entries.
+    *   To prevent stale data, a manual invalidation endpoint (`POST /api/v1/mundiales/invalidar`) is provided to clear the cached key.
+    *   Adding a new championship (`POST /api/v1/mundiales/add_championship`) will save the new record to the database and automatically invalidate the cache to guarantee consistency on the next read.
 
 ---
 
@@ -112,5 +117,38 @@ Once the server is running, the interactive documentation is available at [http:
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/v1/mundiales` | Retrieves the list of World Cup tournaments (Cache-Aside enabled). |
+| `POST` | `/api/v1/mundiales/add_championship` | Adds a new World Cup championship and invalidates the Redis cache. |
 | `POST` | `/api/v1/mundiales/invalidar` | Manually deletes the World Cup data from Redis cache. |
 | `GET` | `/health` | Verifies the operational status of the microservice. |
+
+---
+
+## 📊 Logging & Observability
+
+This application contains a custom HTTP logging interceptor (FastAPI middleware) that prints request lifecycle information to standard output in the following format:
+`[date] | [level] | [endpoint] | [method] | [message]`
+
+### Sample Logs
+
+*   **Cache Miss Flow**:
+    ```text
+    2026-06-18 22:25:16 | INFO | /api/v1/mundiales | GET | Request started
+    2026-06-18 22:25:16 | INFO | Controller: Fetching championships...
+    2026-06-18 22:25:16 | INFO | Redis GET: Querying key 'data:mundiales'
+    2026-06-18 22:25:16 | INFO | Redis CACHE MISS: Key 'data:mundiales' not found
+    2026-06-18 22:25:16 | INFO | Controller: Cache miss. Directing query to simulated PostgreSQL database...
+    2026-06-18 22:25:19 | INFO | Redis SET: Storing key 'data:mundiales' with TTL 20 seconds
+    2026-06-18 22:25:19 | INFO | Redis SET Success: Key 'data:mundiales' stored successfully
+    2026-06-18 22:25:19 | INFO | Controller: Returning database results and updating cache.
+    2026-06-18 22:25:19 | INFO | /api/v1/mundiales | GET | Request completed in 3022.95 ms
+    ```
+
+*   **Cache Hit Flow**:
+    ```text
+    2026-06-18 22:25:20 | INFO | /api/v1/mundiales | GET | Request started
+    2026-06-18 22:25:20 | INFO | Controller: Fetching championships...
+    2026-06-18 22:25:20 | INFO | Redis GET: Querying key 'data:mundiales'
+    2026-06-18 22:25:20 | INFO | Redis CACHE HIT: Key 'data:mundiales' found
+    2026-06-18 22:25:20 | INFO | Controller: Cache hit. Rendering response from Cache.
+    2026-06-18 22:25:20 | INFO | /api/v1/mundiales | GET | Request completed in 2.50 ms
+    ```
