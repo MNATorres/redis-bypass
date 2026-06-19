@@ -23,6 +23,14 @@ def get_mundiales():
                 data=parsed_data
             )
         except json.JSONDecodeError:
+            # --- SELF-HEALING / AUTOMATIC CLEANUP ---
+            # If data is corrupt, we proactively clean up the garbage in Redis 
+            # so the next concurrent user doesn't hit the same broken string.
+            try:
+                delete_from_cache(CACHE_KEY)  # Clean up the garbage
+            except Exception:
+                pass  # Fault tolerance: if delete fails, don't crash the application
+            
             pass  # If data is corrupt, ignore and proceed to the database
 
     # CACHE MISS
