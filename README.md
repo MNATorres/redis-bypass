@@ -21,15 +21,15 @@ graph TD
     
     subgraph Caching & Data Layer
         Ctrl -->|1. Try Get from Cache| Redis["⚡ Redis Cache (cache.py)"]
-        Redis -.->|Cache Hit (Fast RAM)| Ctrl
+        Redis -. Cache Hit - Fast RAM .-> Ctrl
         
         Ctrl -->|2. Cache Miss: Query| DB["💾 PostgreSQL Database (database.py)"]
-        DB -.->|Return Real Data| Ctrl
-        Ctrl -->|3. Save to Cache (TTL 20s)| Redis
+        DB -. Return Real Data .-> Ctrl
+        Ctrl -->|3. Save to Cache - TTL 20s| Redis
     end
     
     Ctrl -->|4. Send Raw Data| View["🎨 Mundial View"]
-    View -.->|Formatted Response| Client
+    View -. Formatted Response .-> Client
 
     style Redis fill:#FFD2D2,stroke:#FF3333,stroke-width:2px;
     style DB fill:#D2E2FF,stroke:#3388FF,stroke-width:2px;
