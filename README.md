@@ -31,9 +31,9 @@ graph TD
     Ctrl -->|4. Send Raw Data| View["🎨 Mundial View"]
     View -. Formatted Response .-> Client
 
-    style Redis fill:#FFD2D2,stroke:#FF3333,stroke-width:2px;
-    style DB fill:#D2E2FF,stroke:#3388FF,stroke-width:2px;
-    style Ctrl fill:#D2FFD2,stroke:#33CC33,stroke-width:2px;
+    style Redis fill:#FFD2D2,stroke:#FF3333,stroke-width:2px,color:#000000;
+    style DB fill:#D2E2FF,stroke:#3388FF,stroke-width:2px,color:#000000;
+    style Ctrl fill:#D2FFD2,stroke:#33CC33,stroke-width:2px,color:#000000;
 ```
 
 ---
