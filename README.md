@@ -37,7 +37,7 @@ graph TD
 ```
 
 <p align="center">
-  <img src="assets/client_usability.png" alt="Client Usability" width="100%" />
+  <img src="assets/cache_flow_diagram.png" alt="Cache Miss and Cache Hit Flows" width="100%" />
 </p>
 
 ---
